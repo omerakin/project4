@@ -257,13 +257,23 @@ public class HotelDataBuilder {
 		tshdata.printToFile(filename);
 	}
 	
-	
+	/**For testing, it is created (in main method)
+	 * 
+	 * @param filename
+	 * 			- Path of file (For testing)
+	 */
 	public void print(Path filename){
 		waitUntilFinished();
 		tshdata.printAttractionsNearEachHotel(filename);
 		
 	}
 	
+	/** This class is multithreaded.
+	 * (the process of fetching attractions)
+	 * 
+	 * @author akin_
+	 *
+	 */
 	private class FetchAttractionsWorker implements Runnable{
 		private int radiusInMiles;
 		private ThreadSafeHotelData localtshData;
@@ -361,9 +371,11 @@ public class HotelDataBuilder {
 		}
 	}
 
-	/**
+	/** For each hotel in the ThreadSafeHotelData, 
+	 * New Worker is created to handle the Attractions
 	 * 
 	 * @param radiusInMiles
+	 * 				- near distance amount
 	 */
 	public void fetchAttractions(int radiusInMiles){
 		HashMap<String, String> hotelLocationInfo;
@@ -374,6 +386,17 @@ public class HotelDataBuilder {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param host
+	 * 			- "maps.googleapis.com"
+	 * @param hotelLocationInfo
+	 * 			- represent location infos in string example = "tourist%20attractions+in+Emeryville&location=37.837773,-122.298142"
+	 * @param radiusInMiles
+	 * 			- near distance amount 
+	 * @return
+	 * 			- returns string represents Get request 
+	 */
 	private String getRequest(String host, String hotelLocationInfo, int radiusInMiles) {
 		String result;
 		//String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
