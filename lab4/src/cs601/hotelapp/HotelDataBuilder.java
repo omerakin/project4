@@ -146,7 +146,7 @@ public class HotelDataBuilder {
 					//tshdata.addReview(hotelId, reviewId, rating, reviewTitle, reviewText, isRecom, date, username);
 				}
 				//merge local reviews to global review
-				merge(localtshData);
+				mergeReviews(localtshData);
 			
 			} catch (org.json.simple.parser.ParseException e) {
 				System.out.println(p.toString());
@@ -197,8 +197,8 @@ public class HotelDataBuilder {
 	 * @param localtshData
 	 * 			- merge local reviews to global review
 	 */
-	public synchronized void merge(ThreadSafeHotelData localtshData) {
-		tshdata.merge(localtshData);
+	public synchronized void mergeReviews(ThreadSafeHotelData localtshData) {
+		tshdata.mergeReviews(localtshData);
 	}
 
 	/**
@@ -263,22 +263,31 @@ public class HotelDataBuilder {
 		tshdata.printAttractionsNearEachHotel(filename);
 		
 	}
-	/**
-	 * 
-	 * @param radiusInMiles
-	 */
-	public void fetchAttractions(int radiusInMiles){
-		HashMap<String, String> hotelLocationInfo;
-		SSLSocketFactory sslSocketFactory = null;
-		SSLSocket sslSocket = null;
-		PrintWriter printWriter = null;
-		BufferedReader bufferedReader = null;
-		String host = "maps.googleapis.com";
-		String request = "";
-		String jsonObjectString = "";
+	
+	private class FetchAttractionsWorker implements Runnable{
+		private int radiusInMiles;
+		private ThreadSafeHotelData localtshData;
+		private SSLSocketFactory sslSocketFactory = null;
+		private SSLSocket sslSocket = null;
+		private PrintWriter printWriter = null;
+		private BufferedReader bufferedReader = null;
+		private String host = "maps.googleapis.com";
+		private String request = "";
+		private String jsonObjectString = "";
+		private String hotelId;
+		private String hotelLocationInfo;
 		
-		hotelLocationInfo = tshdata.generateQueries();
-		for(String hotelId : hotelLocationInfo.keySet()){
+		FetchAttractionsWorker(String hotelId, String hotelLocationInfo, int radiusInMiles){
+			this.radiusInMiles = radiusInMiles;
+			this.hotelId = hotelId;
+			this.hotelLocationInfo = hotelLocationInfo;
+			localtshData = new ThreadSafeHotelData();
+			incrementNumTasks();
+		}
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
 			
 			sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			try {
@@ -286,7 +295,7 @@ public class HotelDataBuilder {
 				sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, 443);
 				// output stream for the secure socket
 				printWriter = new PrintWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
-				request = getRequest(host,hotelLocationInfo.get(hotelId),radiusInMiles);
+				request = getRequest(host,hotelLocationInfo,radiusInMiles);
 				
 				//send a request to the server
 				printWriter.println(request);
@@ -324,10 +333,13 @@ public class HotelDataBuilder {
 						double rating = 0;
 						if(jsonObjectAttraction.get("rating") != null){
 							rating = ((Number)jsonObjectAttraction.get("rating")).doubleValue();
-						}					
-						
-						tshdata.addAttraction(attractionId, name, rating, address, hotelId);
+						}
+						//Add local Attraction
+						localtshData.addAttraction(attractionId, name, rating, address, hotelId);
+						//tshdata.addAttraction(attractionId, name, rating, address, hotelId);
 					}
+					//merge to global Alttractions
+					tshdata.mergeAttractions(localtshData);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}			
@@ -342,14 +354,30 @@ public class HotelDataBuilder {
 					sslSocket.close();
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					decrementNumTask();
 				}
 			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param radiusInMiles
+	 */
+	public void fetchAttractions(int radiusInMiles){
+		HashMap<String, String> hotelLocationInfo;
+		
+		hotelLocationInfo = tshdata.generateQueries();
+		for(String hotelId : hotelLocationInfo.keySet()){
+			workQueue.execute(new FetchAttractionsWorker(hotelId, hotelLocationInfo.get(hotelId) ,radiusInMiles));
 		}
 	}
 	
 	private String getRequest(String host, String hotelLocationInfo, int radiusInMiles) {
 		String result;
-		String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
+		//String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
+		String key = "AIzaSyDhsmtS2ZuTEg3scxv2ZsipglHNBgw3vB4";
 		double radiusInMeters;
 		
 		radiusInMeters = radiusInMiles * 1609;		

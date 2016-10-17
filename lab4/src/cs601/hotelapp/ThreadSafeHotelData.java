@@ -351,13 +351,37 @@ public class ThreadSafeHotelData {
 			lock.unlockRead();
 		}
 	}
+	
+	/**
+	 * 
+	 * @return
+	 * 		- returns HashMap, key is HotelId and value is a partial query containing location information for this hotel
+	 */
+	public HashMap<String,String> generateQueries() {
+		lock.lockRead();
+		try {
+			String info = "";
+			HashMap<String, String> hotelLocationInfo = new HashMap<String, String>();
+			for (String hotelId : getHotels()) {
+				info = "tourist%20attractions+in+" 
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getCity().replace(" ", "%20")
+						+ "&location="
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLatitude() + ","
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLongitude();
+				hotelLocationInfo.put(hotelId, info);
+			}
+			return hotelLocationInfo;
+		} finally {
+			lock.unlockRead();
+		}
+	}
 
 	/**
 	 * 
 	 * @param localtshData
 	 * 			- Second ThreadSafeHotelData will be merged with main ThreadSafeHotelData
 	 */
-	public void merge(ThreadSafeHotelData localtshData) {
+	public void mergeReviews(ThreadSafeHotelData localtshData) {
 		// I locked with lockWrite. Otherwise, deadlock occurs.
 		lock.lockWrite();
 		try {
@@ -383,26 +407,34 @@ public class ThreadSafeHotelData {
 			lock.unlockRead();
 		}
 	}
-	
+
 	/**
 	 * 
-	 * @return
-	 * 		- returns HashMap, key is HotelId and value is a partial query containing location information for this hotel
+	 * @param localtshData
+	 * 				- Second ThreadSafeHotelData will be merged with main ThreadSafeHotelData
 	 */
-	public HashMap<String,String> generateQueries() {
-		lock.lockRead();
+	public void mergeAttractions(ThreadSafeHotelData localtshData) {
+		// I locked with lockWrite. Otherwise, deadlock occurs.
+		lock.lockWrite();
 		try {
-			String info = "";
-			HashMap<String, String> hotelLocationInfo = new HashMap<String, String>();
-			for (String hotelId : getHotels()) {
-				info = "tourist%20attractions+in+" 
-						+ hotelsGivenByHotelId.get(hotelId).getAddress().getCity().replace(" ", "%20")
-						+ "&location="
-						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLatitude() + ","
-						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLongitude();
-				hotelLocationInfo.put(hotelId, info);
+			for (String hotel_id_attractions: localtshData.getAttractionsGivenByHotelId().keySet()){
+				if(hotelsGivenByHotelId.containsKey(hotel_id_attractions)){
+					attractionsGivenByHotelId.put(hotel_id_attractions, localtshData.getAttractionsGivenByHotelId().get(hotel_id_attractions));
+				}
 			}
-			return hotelLocationInfo;
+		} finally {
+			lock.unlockWrite();
+		}
+	}
+
+	/**
+	 * 
+	 * @return - attractionsGivenByHotelId
+	 */
+	private Map<String, TreeMap<String, TouristAttraction>> getAttractionsGivenByHotelId() {
+		lock.lockRead();
+		try{
+			return attractionsGivenByHotelId;
 		} finally {
 			lock.unlockRead();
 		}
