@@ -122,12 +122,12 @@ public class Lab4Test {
 				"Golden Gate Park; San Francisco, CA, United States",
 				"USS Pampanito; Fishermans Wharf, San Francisco, CA 94133, United States",
 				"Aquarium of the Bay; 2 Beach St, San Francisco, CA 94133, United States",
-				//"Legion of Honor; 100 34th Ave, San Francisco, CA 94121, United States",
+				"Legion of Honor; 100 34th Ave, San Francisco, CA 94121, United States",
 				"Japanese Tea Garden; 75 Hagiwara Tea Garden Dr, San Francisco, CA 94102, United States",
 				"Musée Mécanique; Pier 45, A, San Francisco, CA 94133, United States",
 				"Chinatown San Francisco; Stockton St Tunnel, San Francisco, CA 94108, United States",
-				"Twin Peaks; 501 Twin Peaks Blvd, San Francisco, CA 94114, United States"};
-				//"Madame Tussauds San Francisco; 145 Jefferson St, San Francisco, CA 94133, United States" };
+				"Twin Peaks; 501 Twin Peaks Blvd, San Francisco, CA 94114, United States"
+				};
 
 		allAttractions.put("12539", expectedAttractions12539);
 
@@ -140,9 +140,9 @@ public class Lab4Test {
 				"California Academy of Sciences; 55 Music Concourse Dr, San Francisco, CA 94118, United States",
 				"Orange Memorial Park; Orange Ave, South San Francisco, CA 94080, United States",
 				"Buri Buri Park; South San Francisco, CA 94080, United States",
-				"Brentwood Park; Rosewood & Briarwood, South San Francisco, CA 94080, United States"};
-				//"Westborough Recreation Building; 2380 Galway Dr, South San Francisco, CA 94080, United States",
-				//"Centennial Dog Park; SSF Centennial Trail, South San Francisco, CA 94080, United States" };
+				"Brentwood Park; Rosewood & Briarwood, South San Francisco, CA 94080, United States",
+				"Westborough Recreation Building; 2380 Galway Dr, South San Francisco, CA 94080, United States"
+				};
 		allAttractions.put("16955", expectedAttractions16955);
 
 		String[] expectedAttractions1047 = {
@@ -155,10 +155,10 @@ public class Lab4Test {
 				"Golden Gate Park; San Francisco, CA, United States",
 				"San Francisco Deluxe Sightseeing Tours; 2737 Taylor St, San Francisco, CA 94133, United States",
 				"USS Pampanito; Fishermans Wharf, San Francisco, CA 94133, United States",
-				//"Legion of Honor; 100 34th Ave, San Francisco, CA 94121, United States",
+				"Legion of Honor; 100 34th Ave, San Francisco, CA 94121, United States",
 				"Aquarium of the Bay; 2 Beach St, San Francisco, CA 94133, United States",
 				"Japanese Tea Garden; 75 Hagiwara Tea Garden Dr, San Francisco, CA 94102, United States",
-				"Musée Mécanique; Pier 45, A, San Francisco, CA 94133, United States",
+				//"Musée Mécanique; Pier 45, A, San Francisco, CA 94133, United States",
 				"Chinatown San Francisco; Stockton St Tunnel, San Francisco, CA 94108, United States",
 		};
 		

@@ -69,7 +69,7 @@ public class ThreadSafeHotelData {
 		lock.lockWrite();
 		try {
 			//Set the values to the address and hotel object.
-			address = new Address(streetAddress, city, state, lat, lon);
+			address = new Address(streetAddress, city, state, lon, lat);
 			hotel = new Hotel(hotelId, hotelName, address);		
 			//Add to the hotelsGivenByHotelId TreeMap.
 			hotelsGivenByHotelId.put(hotelId, hotel);

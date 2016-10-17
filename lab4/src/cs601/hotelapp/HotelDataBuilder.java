@@ -306,7 +306,7 @@ public class HotelDataBuilder {
 				// output stream for the secure socket
 				printWriter = new PrintWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
 				request = getRequest(host,hotelLocationInfo,radiusInMiles);
-				
+				//System.out.println(request );
 				//send a request to the server
 				printWriter.println(request);
 				printWriter.flush();
@@ -401,7 +401,7 @@ public class HotelDataBuilder {
 		String result;
 		//String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
 		String key = "AIzaSyDhsmtS2ZuTEg3scxv2ZsipglHNBgw3vB4";
-		double radiusInMeters;
+		int radiusInMeters;
 		
 		radiusInMeters = radiusInMiles * 1609;		
 		result = "GET /maps/api/place/textsearch/json?query=" + hotelLocationInfo 
