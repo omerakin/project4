@@ -235,11 +235,14 @@ public class ThreadSafeHotelData {
 		try {
 			StringBuffer stringBuffer = new StringBuffer();
 			stringBuffer.append("Attractions near " + hotelsGivenByHotelId.get(hotelId).getHotel_name() 
-					+ ", " + hotelId + ":" + System.lineSeparator());
+					+ ", " + hotelId + "" + System.lineSeparator());
 			TreeMap<String, TouristAttraction> treeMap = attractionsGivenByHotelId.get(hotelId);
 			for (String attractionId : treeMap.keySet()) {
 				TouristAttraction touristAttraction = treeMap.get(attractionId);
-				stringBuffer.append(touristAttraction.getName() + " " + touristAttraction.getAddress() + System.lineSeparator());
+				stringBuffer.append(touristAttraction.getName() + "; " 
+								+ touristAttraction.getAddress() 
+			//					+ System.lineSeparator()
+								+ System.lineSeparator());
 			}
 			return stringBuffer.toString();
 		} finally {
@@ -335,9 +338,11 @@ public class ThreadSafeHotelData {
 			try {
 				PrintWriter printWriter = new PrintWriter(new FileWriter(filename.toString()));
 				for(String hotelId : getHotels()){
-					printWriter.println("\n++++++++++++++++++++");
 					printWriter.print(getAttractions(hotelId));
+					printWriter.println("++++++++++++++++++++");
 				}
+				printWriter.flush();
+				printWriter.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -378,4 +383,29 @@ public class ThreadSafeHotelData {
 			lock.unlockRead();
 		}
 	}
+	
+	/**
+	 * 
+	 * @return
+	 * 		- returns HashMap, key is HotelId and value is a partial query containing location information for this hotel
+	 */
+	public HashMap<String,String> generateQueries() {
+		lock.lockRead();
+		try {
+			String info = "";
+			HashMap<String, String> hotelLocationInfo = new HashMap<String, String>();
+			for (String hotelId : getHotels()) {
+				info = "tourist%20attractions+in+" 
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getCity().replace(" ", "%20")
+						+ "&location="
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLatitude() + ","
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLongitude();
+				hotelLocationInfo.put(hotelId, info);
+			}
+			return hotelLocationInfo;
+		} finally {
+			lock.unlockRead();
+		}
+	}
+	
 }

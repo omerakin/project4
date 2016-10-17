@@ -12,6 +12,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -267,6 +268,7 @@ public class HotelDataBuilder {
 	 * @param radiusInMiles
 	 */
 	public void fetchAttractions(int radiusInMiles){
+		HashMap<String, String> hotelLocationInfo;
 		SSLSocketFactory sslSocketFactory = null;
 		SSLSocket sslSocket = null;
 		PrintWriter printWriter = null;
@@ -275,85 +277,84 @@ public class HotelDataBuilder {
 		String request = "";
 		String jsonObjectString = "";
 		
-		sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-		try {
-			// HTTPS uses port 443
-			sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, 443);
-			// output stream for the secure socket
-			printWriter = new PrintWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
-			request = getRequest(host,radiusInMiles);
-			//check the string
-			//System.out.println(request);
+		hotelLocationInfo = tshdata.generateQueries();
+		for(String hotelId : hotelLocationInfo.keySet()){
 			
-			//send a request to the server
-			printWriter.println(request);
-			printWriter.flush();
-			
-			// input stream for the secure socket.
-			bufferedReader = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
-			String str;
-			StringBuffer stringBuffer = new StringBuffer();
-			while((str = bufferedReader.readLine()) != null ) {
-				stringBuffer.append(str);
-				//System.out.println(str);
-			}
-			jsonObjectString = stringBuffer.toString();
-			//System.out.println(jsonObject);
-			
-			//remove headers and get jsonObject
-			Pattern p = Pattern.compile("Connection: close(.*)");
-			Matcher matcher = p.matcher(jsonObjectString);
-			if(matcher.find()){
-				jsonObjectString = matcher.group(1);
-				System.out.println(jsonObjectString);	
-			}
-			
-			JSONParser jsonParser = new JSONParser();
+			sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			try {
-				JSONObject jsonObject = (JSONObject) jsonParser.parse(jsonObjectString);
-				JSONArray jsonArray = (JSONArray) jsonObject.get("results");
-				JSONObject jsonObjectAttraction;
+				// HTTPS uses port 443
+				sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, 443);
+				// output stream for the secure socket
+				printWriter = new PrintWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
+				request = getRequest(host,hotelLocationInfo.get(hotelId),radiusInMiles);
 				
-				for(int i=0; i<jsonArray.size();i++) {
-					jsonObjectAttraction = (JSONObject) jsonArray.get(i);
-					
-					String attractionId = (String) jsonObjectAttraction.get("id");
-					String name = (String) jsonObjectAttraction.get("name");
-					String address = (String) jsonObjectAttraction.get("formatted_address");
-					double rating = 0;
-					if(jsonObjectAttraction.get("rating") != null){
-						rating = ((Number)jsonObjectAttraction.get("rating")).doubleValue();
-					}
-					//double rating = (double) jsonObjectAttraction.get("rating");
-					
-					
-					tshdata.addAttraction(attractionId, name, rating, address, "5361249");
+				//send a request to the server
+				printWriter.println(request);
+				printWriter.flush();
+				
+				// input stream for the secure socket.
+				bufferedReader = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
+				String str;
+				StringBuffer stringBuffer = new StringBuffer();
+				while((str = bufferedReader.readLine()) != null ) {
+					stringBuffer.append(str);
 				}
-			} catch (ParseException e) {
+				jsonObjectString = stringBuffer.toString();
+				
+				//remove headers and get jsonObject
+				Pattern p = Pattern.compile("Connection: close(.*)");
+				Matcher matcher = p.matcher(jsonObjectString);
+				if(matcher.find()){
+					jsonObjectString = matcher.group(1);
+					//System.out.println(jsonObjectString);	
+				}
+				
+				JSONParser jsonParser = new JSONParser();
+				try {
+					JSONObject jsonObject = (JSONObject) jsonParser.parse(jsonObjectString);
+					JSONArray jsonArray = (JSONArray) jsonObject.get("results");
+					JSONObject jsonObjectAttraction;
+					
+					for(int i=0; i<jsonArray.size();i++) {
+						jsonObjectAttraction = (JSONObject) jsonArray.get(i);
+						
+						String attractionId = (String) jsonObjectAttraction.get("id");
+						String name = (String) jsonObjectAttraction.get("name");
+						String address = (String) jsonObjectAttraction.get("formatted_address");
+						double rating = 0;
+						if(jsonObjectAttraction.get("rating") != null){
+							rating = ((Number)jsonObjectAttraction.get("rating")).doubleValue();
+						}					
+						
+						tshdata.addAttraction(attractionId, name, rating, address, hotelId);
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}			
+			} catch (UnknownHostException e) {
 				e.printStackTrace();
-			}			
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				printWriter.close();
-				bufferedReader.close();
-				sslSocket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					printWriter.close();
+					bufferedReader.close();
+					sslSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
-	private String getRequest(String host, int radiusInMiles) {
+	private String getRequest(String host, String hotelLocationInfo, int radiusInMiles) {
 		String result;
 		String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
-		radiusInMiles = 20;
+		double radiusInMeters;
 		
-		result = "GET /maps/api/place/textsearch/json?query=tourist%20attractions+in+Santa%20Marta&location=-74.225873,11.203319" 
-					+ "&radius=" + radiusInMiles + "&key=" + key + " HTTP/1.1" + System.lineSeparator() // GET request
+		radiusInMeters = radiusInMiles * 1609;		
+		result = "GET /maps/api/place/textsearch/json?query=" + hotelLocationInfo 
+					+ "&radius=" + radiusInMeters + "&key=" + key + " HTTP/1.1" + System.lineSeparator() // GET request
 					+ "Host: " + host + System.lineSeparator() // Host header required for HTTP/1.1
 					+ "Connection: close" + System.lineSeparator() // make sure the server closes the connection after we fetch one page
 					+ System.lineSeparator();
@@ -361,24 +362,12 @@ public class HotelDataBuilder {
 	}
 
 	public static void main(String[] args) {
-		/*
 		ThreadSafeHotelData tsData = new ThreadSafeHotelData();
 		HotelDataBuilder hotelDataBuilder = new HotelDataBuilder(tsData);
-		//hotelDataBuilder.loadHotelInfo("inputLab1/hotels200.json");
-		//hotelDataBuilder.loadReviews(Paths.get("input/reviews"));
-		hotelDataBuilder.loadHotelInfo("input/hotels200.json");
-		hotelDataBuilder.loadReviews(Paths.get("input/reviews8000"));
-		hotelDataBuilder.waitUntilFinished();
-		hotelDataBuilder.printToFile(Paths.get("outputFile"));
-		hotelDataBuilder.shutdown();
-		*/
-		
-		ThreadSafeHotelData tsData = new ThreadSafeHotelData();
-		HotelDataBuilder hotelDataBuilder = new HotelDataBuilder(tsData);
+		hotelDataBuilder.loadHotelInfo("input/hotels4.json");
 		hotelDataBuilder.fetchAttractions(20);
 		hotelDataBuilder.print(Paths.get("outputFile"));
 		hotelDataBuilder.shutdown();
-		
 	}
 	
 }
