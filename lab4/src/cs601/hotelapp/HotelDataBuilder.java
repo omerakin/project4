@@ -399,8 +399,8 @@ public class HotelDataBuilder {
 	 */
 	private String getRequest(String host, String hotelLocationInfo, int radiusInMiles) {
 		String result;
-		//String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
-		String key = "AIzaSyDhsmtS2ZuTEg3scxv2ZsipglHNBgw3vB4";
+		String key = "AIzaSyCvBVHwB8nRJDMKHI1WxkNR0kZMhnI9_oU";
+		//String key = "AIzaSyDhsmtS2ZuTEg3scxv2ZsipglHNBgw3vB4";
 		int radiusInMeters;
 		
 		radiusInMeters = radiusInMiles * 1609;		

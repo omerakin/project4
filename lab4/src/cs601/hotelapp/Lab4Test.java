@@ -158,7 +158,7 @@ public class Lab4Test {
 				"Legion of Honor; 100 34th Ave, San Francisco, CA 94121, United States",
 				"Aquarium of the Bay; 2 Beach St, San Francisco, CA 94133, United States",
 				"Japanese Tea Garden; 75 Hagiwara Tea Garden Dr, San Francisco, CA 94102, United States",
-				//"Musée Mécanique; Pier 45, A, San Francisco, CA 94133, United States",
+				"Musée Mécanique; Pier 45, A, San Francisco, CA 94133, United States",
 				"Chinatown San Francisco; Stockton St Tunnel, San Francisco, CA 94108, United States",
 		};
 		
