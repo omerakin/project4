@@ -306,7 +306,7 @@ public class HotelDataBuilder {
 				// output stream for the secure socket
 				printWriter = new PrintWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
 				request = getRequest(host,hotelLocationInfo,radiusInMiles);
-				//System.out.println(request );
+				System.out.println(request );
 				//send a request to the server
 				printWriter.println(request);
 				printWriter.flush();

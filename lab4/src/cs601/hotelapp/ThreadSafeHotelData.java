@@ -364,7 +364,7 @@ public class ThreadSafeHotelData {
 			HashMap<String, String> hotelLocationInfo = new HashMap<String, String>();
 			for (String hotelId : getHotels()) {
 				info = "tourist%20attractions+in+" 
-						+ hotelsGivenByHotelId.get(hotelId).getAddress().getCity().replace(" ", "%20")
+						+ hotelsGivenByHotelId.get(hotelId).getAddress().getCity().replaceAll(" ", "%20")
 						+ "&location="
 						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLatitude() + ","
 						+ hotelsGivenByHotelId.get(hotelId).getAddress().getLongitude();
